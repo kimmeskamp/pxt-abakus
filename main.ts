@@ -1,6 +1,6 @@
 /**
  * Schnelle Anzeige von mehrstelligen Zahlen für den Calliope mini
- * Thorsten Kimmeskamp, 10.12.2021
+ * Thorsten Kimmeskamp, 31.01.2022
  */
 
 //% weight=100 color=#0fbc11 icon="\uf1de" block="Abakus"
@@ -117,10 +117,28 @@ namespace abakus {
      */
     //% blockId="zeigeZahl" block="zeige Zahl: Wert %wert"
     export function zeigeZahl(wert: number) {
-		let s = wert.toString()
-		if (s.length > 5) { // zu viele Stellen
-			basic.showString("#")
-		} else {
+		let s = wert.toString() // Wert in String umwandeln
+		
+		if (s.length > 5) { // Zahl hat mehr Stellen, als das Display Spalten hat
+            if (wert > 99999.4 || wert < -9999.5) { // Zahl auch mit Runden nicht darstellbar
+    			basic.showString("#") // '#' als Fehlersymbol anzeigen
+            } else { // es ist eine Kommazahl mit zu vielen Nachkommastellen
+                let anz_vorkomma = s.indexOf(".") // Vorkommastellen, zaehlt ein ggf. vorhandenes '-'-Zeichen schon mit
+                let verf_anz_nachkomma = 4 - anz_vorkomma // verfuegbare Nachkommastellen: 5 - Dezimalpunkt - Vorkommastellen inkl. '-'
+                if (wert > -1 && wert < 1) { // Zahl zw. -1 und 1
+					verf_anz_nachkomma += 1 // eine Nachkommastelle mehr zur Verfuegung stellen, da "0.nnn" dann als ".nnn" und "-0.nnn" als "-.nnn" geschrieben werden kann
+				}
+				wert = Math.roundWithPrecision(wert, verf_anz_nachkomma) // mit  hoechstmoeglicher Praezision runden            
+				s = wert.toString() // gerundete Zahl zurueck in den String speichern
+			}
+		}
+		
+		if (s.length == 6) { // kann nur entstehen, wenn > -1 und < 1, nur dann wurde eine Nachkommestelle mehr zur Verfuegung gestellt
+            s = s.replace("0.", ".") // ueberfluessige fuehrende 0 loeschen (auch hinter einem ggf. vorhandenem '-'-Zeichen) => String hat danach definitiv eine Laenge von 5
+        }
+	
+		if (s.length <= 5) { // Zahl ist darstellbar, entweder von vorneherein oder gerundet		
+			// rechtsbuendig formatieren
 			if (s.charCodeAt(0) != 45) { // nicht negativ
 				while (s.length < 5) {
 					s = "0" + s // von links mit Nullen auffuellen
@@ -133,6 +151,7 @@ namespace abakus {
 				s = "-" + s2 // Vorzeichen wieder einfuegen
 			}
     
+			// ziffernweise darstellen
 			for (let i = 0; i < s.length; i++) {
 				let v = s.charCodeAt(i)
 				if (v >= 48 && v <= 57) { // Ziffer

@@ -115,7 +115,7 @@ namespace abakus {
 	/**
      * Zeige eine komplette Zahl an.
      */
-    //% blockId="zeigeZahl" block="zeige Zahl: Wert %wert"
+    //% blockId="zeigeZahl" block="zeige Zahl: %wert"
     export function zeigeZahl(wert: number) {
 		let s = wert.toString() // Wert in String umwandeln
 		
